@@ -1,0 +1,4 @@
+config.yml
+CurrentJDK
+tmp/cucumber/*.html
+tmp/deploy/*.html
