@@ -57,7 +57,7 @@ module Tess
     # Allow plugin to hook in and set @hello_messages
     # Only do the default 'hello' message if no plugins have set hello messages
     def say_hello_messages
-      nil
+      speak "Booyakasha!"
       # @hello_messages.push @config['hello'] if @hello_messages.empty?
       # @hello_messages.each do |hm|
       #   puts "saying hello message: #{hm}"
@@ -87,6 +87,8 @@ module Tess
     def trap_signals
       [:INT, :TERM].each do |sig|
         trap(sig) do
+          speak "Someone's pulling my plug!"
+          speak "BRB"
           $server_thread[:server].shutdown
           puts "Trapped signal #{sig.to_s}"
           puts 'Shutting down gracefully'
