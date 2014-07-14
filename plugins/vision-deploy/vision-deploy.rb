@@ -21,7 +21,7 @@ class VisionDeploy < Tess::Plugin::Base
         if @@run_deploy
           result = ''
           Bundler.with_clean_env do
-            result = `cd #{@@bot.config['deploy_dir']} && git checkout master && git pull && eval \`ssh-agent -s\` && ssh-add ~/.ssh/id_dsa && cap deploy 2>&1`.chomp
+            result = `cd #{@@bot.config['deploy_dir']} && git checkout #{@@branch} && git pull && eval \`ssh-agent -s\` && ssh-add ~/.ssh/id_dsa && cap #{ @@server || 'staging' } -sbranch="#{ @@branch || master }" deploy 2>&1`.chomp
             @@result = "deploy/#{Time.now().to_i}.html"
             File.open("tmp/#{@@result}", 'w') { |file| file.write("<pre>#{result}</pre>") }
           end
@@ -62,13 +62,15 @@ class VisionDeploy < Tess::Plugin::Base
       start_thread
       return false
     end
+    @@branch = $1 if ! @@run_deploy && message.content =~ /^tess.* (version|branch) ([a-zA-Z0-9\-_]+)$/
+    @@server = $1 if ! @@run_deploy && message.content =~ /^tess.* into ([a-zA-Z0-9\-_]+)$/
     message.content =~ /^tess\s+.*?((run\s+)|)deploy/i
   end
 
   private
 
   def response_html
-    return ["<b>#{@speaker}, your request to deploy to staging cannot be processed until I finish the deployment initiated by #{@@run_deploy}.</b>",
+    return ["<b>#{@speaker}, your request to deploy to staging cannot be processed until I finish the deployment initiated by #{@@run_deploy == @speaker ? 'you' : @@run_deploy}.</b>",
             "(You can, alternatively, ask me to terminate the current deployment by typing: <i>tess kill deploy</i>)"] unless !@@run_deploy
     @@ctype = 'html'
     @@run_deploy = @speaker

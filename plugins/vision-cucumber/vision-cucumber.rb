@@ -66,7 +66,7 @@ class VisionCucumber < Tess::Plugin::Base
       start_thread
       return false
     end
-    if (message.content =~ /branch\s+.*?$/i && !@@run_cucumber)
+    if (message.content =~ /branch\s+([a-zA-Z0-9\-_]+)/i && !@@run_cucumber)
       @@branch = $&.split[1]
     end
     message.content =~ /^tess\s+.*?((run\s+)|)(tests{0,1}|cucumber)/i
@@ -87,7 +87,7 @@ class VisionCucumber < Tess::Plugin::Base
   def response_text
     return ["Sorry #{@speaker}, you must specify a branch for me to #{dance}.",
             "e.g.: tess run cucumber on branch DEC-404"] unless @@branch
-    return ["#{@speaker}, your request to test cannot be processed until I finish the test initiated by #{@@run_cucumber}.",
+    return ["#{@speaker}, your request to test cannot be processed until I finish the test initiated by #{@@run_cucumber == @speaker ? 'you' : @@run_cucumber}.",
             "(You can alternatively ask me to terminate the current test by typing: tess kill cucumber)"] unless !@@run_cucumber
     @@ctype = 'text'
     @@run_cucumber = @speaker
