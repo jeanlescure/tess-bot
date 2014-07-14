@@ -22,7 +22,7 @@ class VisionDeploy < Tess::Plugin::Base
           result = ''
           Bundler.with_clean_env do
             $tess_busy[1] = 1
-            result = `cd #{@@bot.config['deploy_dir']} && git checkout #{@@branch} && git pull && eval \`ssh-agent -s\` && ssh-add ~/.ssh/id_dsa && cap #{ @@server || 'staging' } -sbranch="#{ @@branch || master }" deploy 2>&1`.chomp
+            result = `cd #{@@bot.config['deploy_dir']} && git checkout #{@@branch} && git pull && eval \`ssh-agent -s\` && ssh-add ~/.ssh/id_dsa && cap #{ @@server || 'staging' } -sbranch="#{ @@branch || 'master' }" deploy 2>&1`.chomp
             $tess_busy[1] = 0
 	    @@result = "deploy/#{Time.now().to_i}.html"
             File.open("tmp/#{@@result}", 'w') { |file| file.write("<pre>#{result}</pre>") }
