@@ -9,7 +9,7 @@ class TessResponder < Tess::Plugin::Base
   def respond_to_message?(message)
     @speaker = message.speaker.titleize.split[0]
     if (message.content =~ /^tess$/i)
-      @@bot.speak(name_response(@speaker)), @@ctype)
+      @@bot.speak(name_response(@speaker), @@ctype)
       return false
     end
     if (message.content =~ /^tess\s+.*?(busy|(doing\s+something)|running)/i)
