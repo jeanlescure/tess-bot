@@ -21,8 +21,10 @@ class VisionDeploy < Tess::Plugin::Base
         if @@run_deploy
           result = ''
           Bundler.with_clean_env do
+            $tess_busy += 1
             result = `cd #{@@bot.config['deploy_dir']} && git checkout #{@@branch} && git pull && eval \`ssh-agent -s\` && ssh-add ~/.ssh/id_dsa && cap #{ @@server || 'staging' } -sbranch="#{ @@branch || master }" deploy 2>&1`.chomp
-            @@result = "deploy/#{Time.now().to_i}.html"
+            $tess_busy -= 1
+	    @@result = "deploy/#{Time.now().to_i}.html"
             File.open("tmp/#{@@result}", 'w') { |file| file.write("<pre>#{result}</pre>") }
           end
           result =~ /sftp download complete$/i

@@ -23,8 +23,10 @@ class VisionCucumber < Tess::Plugin::Base
           result = `cd #{@@bot.config['cucumber_dir']} && git checkout master && git pull && git checkout #{@@branch}`
           if $?.to_i == 0
             Bundler.with_clean_env do
+              $tess_busy += 1
               result = `cd #{@@bot.config['cucumber_dir']} && git checkout master && git pull && git checkout #{@@branch} && git pull && cucumber 2>&1`
-              @@result = "cucumber/#{Time.now().to_i}.html"
+              $tess_busy -= 1
+	      @@result = "cucumber/#{Time.now().to_i}.html"
               File.open("tmp/#{@@result}", 'w') { |file| file.write("<pre>#{result}</pre>") }
             end
             result =~ /\d\d scenarios \([\s\S]*/i

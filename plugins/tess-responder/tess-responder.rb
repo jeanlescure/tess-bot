@@ -12,6 +12,11 @@ class TessResponder < Tess::Plugin::Base
       @@bot.speak(name_response(message.speaker), @@ctype)
       return false
     end
+    if (message.content =~ /^tess\s+(busy|(doing\s+something)|running)/i)
+      busy_message = ($tess_busy == 0) ? "I am not doing anything right now." : "I am busy, yes."
+      @@bot.speak(busy_message, @@ctype)
+      return false
+    end
     message.content =~ /^tess\s+.*?(help|introduce)/i
   end
 
