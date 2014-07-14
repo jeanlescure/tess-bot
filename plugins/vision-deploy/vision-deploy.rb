@@ -62,8 +62,8 @@ class VisionDeploy < Tess::Plugin::Base
       start_thread
       return false
     end
-    @@branch = $1 if (! @@run_deploy && message.content =~ /^tess.* (version|branch) ([^\s]+)$/
-    @@server = $1 if (! @@run_deploy && message.content =~ /^tess.* into ([^\s]+)$/
+    @@branch = $1 if (! @@run_deploy && message.content =~ /^tess.* (version|branch) ([a-zA-Z0-9-_]+)$/
+    @@server = $1 if (! @@run_deploy && message.content =~ /^tess.* into ([a-zA-Z0-9-_]+)$/
     message.content =~ /^tess\s+.*?((run\s+)|)deploy/i
   end
 
