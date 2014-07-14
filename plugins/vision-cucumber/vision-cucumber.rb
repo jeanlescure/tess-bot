@@ -66,7 +66,7 @@ class VisionCucumber < Tess::Plugin::Base
       start_thread
       return false
     end
-    if (message.content =~ /branch\s+([a-zA-Z0-9-_]+)/i && !@@run_cucumber)
+    if (message.content =~ /branch\s+([a-zA-Z0-9\-_]+)/i && !@@run_cucumber)
       @@branch = $&.split[1]
     end
     message.content =~ /^tess\s+.*?((run\s+)|)(tests{0,1}|cucumber)/i
