@@ -13,7 +13,7 @@ class TessResponder < Tess::Plugin::Base
       return false
     end
     if (message.content =~ /^tess\s+.*?(busy|(doing\s+something)|running)/i)
-      busy_message = ($tess_busy == 0) ? "I am not doing anything right now." : "I am busy, yes."
+      busy_message = ($tess_busy[0] == 0 && $tess_busy[1] == 0) ? "I am not doing anything right now." : "I am busy, yes."
       @@bot.speak(busy_message, @@ctype)
       return false
     end

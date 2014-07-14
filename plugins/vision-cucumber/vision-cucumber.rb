@@ -23,9 +23,9 @@ class VisionCucumber < Tess::Plugin::Base
           result = `cd #{@@bot.config['cucumber_dir']} && git checkout master && git pull && git checkout #{@@branch}`
           if $?.to_i == 0
             Bundler.with_clean_env do
-              $tess_busy += 1
+              $tess_busy[0] = 1
               result = `cd #{@@bot.config['cucumber_dir']} && git checkout master && git pull && git checkout #{@@branch} && git pull && cucumber 2>&1`
-              $tess_busy -= 1
+              $tess_busy[0] = 0
 	      @@result = "cucumber/#{Time.now().to_i}.html"
               File.open("tmp/#{@@result}", 'w') { |file| file.write("<pre>#{result}</pre>") }
             end
@@ -64,6 +64,7 @@ class VisionCucumber < Tess::Plugin::Base
       end
       @@result = "Cucumber killed as per #{message.speaker}'s request!"
       Thread.kill(@vc_thread)
+      $tess_busy[0] = 0
       @@bot.speak(@@result, @@ctype)
       start_thread
       return false
