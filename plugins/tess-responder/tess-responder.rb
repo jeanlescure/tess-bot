@@ -17,7 +17,7 @@ class TessResponder < Tess::Plugin::Base
       @@bot.speak(busy_message, @@ctype)
 
       $tess_busy.each do |c|
-        @@bot.speak( eval(c).describe_action, @@ctype ) if Kernel.const_defined?(c) && eval(c).responds_to?("describe_action")
+        @@bot.speak( c.describe_action, @@ctype ) if c.respond_to?("describe_action")
       end
       return false
     end
