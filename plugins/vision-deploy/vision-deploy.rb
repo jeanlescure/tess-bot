@@ -16,9 +16,16 @@ class VisionDeploy < Tess::Plugin::Base
   end
 
   def cap_command
-    case @@command 
+    case @@action 
       when "deploy" then "cap #{ @@server } -sbranch=\"#{ @@branch }\" deploy"
       when "restart" then "cap #{ @@server } deploy:restart"
+    end
+  end
+  
+  def describe_action
+    case @@action
+      when 'deploy' then "Deploying #{ @@branch }to #{ @@server }."
+      when 'restart' then "Restarting #{@@server}"
     end
   end
   
@@ -34,13 +41,13 @@ class VisionDeploy < Tess::Plugin::Base
 	    @@result = "deploy/#{Time.now().to_i}.html"
             File.open("tmp/#{@@result}", 'w') { |file| file.write("<pre>#{result}</pre>") }
           end
-          result =~ /sftp download complete$/i
-          if (!$&.nil?)
-            pre_result = "#{@@run_deploy}'s deploy task completed successfully!"
+          # result =~ /sftp download complete$/i
+          if ($?.success?)
+            pre_result = "#{@@run_deploy}'s #{@@action} task completed successfully!"
             pre_result = (@@ctype == 'html') ? "<b>#{pre_result}</b>" : pre_result
             @@bot.speak("#{pre_result}",@@ctype)
           else
-            pre_result = "#{@@run_deploy}, I failed to deploy. :("
+            pre_result = "#{@@run_deploy}, I failed to #{ @@action }. :("
             pre_result = (@@ctype == 'html') ? "<b>#{pre_result}</b>" : pre_result
             @@bot.speak("#{pre_result}",@@ctype)
           end
@@ -73,13 +80,15 @@ class VisionDeploy < Tess::Plugin::Base
       start_thread
       return false
     end
-    @@branch = $1 if ! @@run_deploy && message.content =~ /^tess.* (version|branch) ([a-zA-Z0-9\-_]+)/
-    @@server = $1 if ! @@run_deploy && message.content =~ /^tess.* (?:to|into|restart) (#{ available_servers.join "|" })/
-    @@command = $1 if ! @@run_deploy && message.context =~ /^tess.*(restart|deploy)/
+    @@branch = $1 if ! @@run_deploy && message.content =~ /^tess.* (version|branch) ([a-zA-Z0-9\-_]+)/i
+    @@server = $1 if ! @@run_deploy && message.content =~ /^tess.* (?:to|into|restart) (#{ available_servers.join "|" })/i
+    @@action = $1 if ! @@run_deploy && message.content =~ /^tess\s+.*?(?:(?:run\s+)|)(deploy|restart)/
 
     @@branch ||= 'master'
     @@server ||= 'staging'
-    message.content =~ /^tess\s+.*?((run\s+)|)(deploy|restart)/i
+    @@action ||= 'deploy'
+
+    message.content =~ /^tess\s+.*?((run\s+)|)(?:deploy|restart)/i
   end
 
   private
