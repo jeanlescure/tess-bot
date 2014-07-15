@@ -16,7 +16,7 @@ class TessResponder < Tess::Plugin::Base
       tasks = $tess_busy.map do |c|
         c.describe_action if c.respond_to?("describe_action")
       end.compact
-      busy_message = $tess_busy.length == 0 ? "I am not doing anything right now." : "I am busy, yes. I'm #{ Tess::Language.enumerate tasks }"
+      busy_message = $tess_busy.length == 0 ? "I am not doing anything right now." : "I am busy, yes. I'm #{ Tess::Language.enumerate(tasks).downcase }"
       @@bot.speak(busy_message, @@ctype)
 
       return false

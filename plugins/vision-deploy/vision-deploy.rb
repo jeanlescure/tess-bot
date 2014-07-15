@@ -24,7 +24,7 @@ class VisionDeploy < Tess::Plugin::Base
   
   def self.describe_action
     case @@action
-      when 'deploy' then "Deploying #{ @@branch }to #{ @@server }."
+      when 'deploy' then "Deploying #{ @@branch } to #{ @@server }."
       when 'restart' then "Restarting #{@@server}"
     end
   end
@@ -80,7 +80,7 @@ class VisionDeploy < Tess::Plugin::Base
       start_thread
       return false
     end
-    @@branch = $1 if ! @@run_deploy && message.content =~ /^tess.* (version|branch) ([a-zA-Z0-9\-_]+)/i
+    @@branch = $1 if ! @@run_deploy && message.content =~ /^tess.* (?:version|branch) ([a-zA-Z0-9\-_]+)/i
     @@server = $1 if ! @@run_deploy && message.content =~ /^tess.* (?:to|into|restart) (#{ available_servers.join "|" })/i
     @@action = $1 if ! @@run_deploy && message.content =~ /^tess\s+.*?(?:(?:run\s+)|)(deploy|restart)/
 
