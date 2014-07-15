@@ -23,9 +23,9 @@ class VisionCucumber < Tess::Plugin::Base
           result = `cd #{@@bot.config['cucumber_dir']} && git checkout master && git pull && git checkout #{@@branch}`
           if $?.to_i == 0
             Bundler.with_clean_env do
-              $tess_busy[0] = 1
+              $tess_busy << self.class
               result = `cd #{@@bot.config['cucumber_dir']} && git checkout master && git pull && git checkout #{@@branch} && git pull && cucumber 2>&1`
-              $tess_busy[0] = 0
+            $tess_busy.delete self.class
 	      @@result = "cucumber/#{Time.now().to_i}.html"
               File.open("tmp/#{@@result}", 'w') { |file| file.write("<pre>#{result}</pre>") }
             end
@@ -64,7 +64,7 @@ class VisionCucumber < Tess::Plugin::Base
       end
       @@result = "Cucumber killed as per #{message.speaker}'s request!"
       Thread.kill(@vc_thread)
-      $tess_busy[0] = 0
+      $tess_busy.delete self.class
       @@bot.speak(@@result, @@ctype)
       start_thread
       return false
@@ -73,6 +73,10 @@ class VisionCucumber < Tess::Plugin::Base
       @@branch = $&.split[1]
     end
     message.content =~ /^tess\s+.*?((run\s+)|)(tests{0,1}|cucumber)/i
+  end
+
+  def self.describe_action
+    "Running tests on branch '#{@@branch}'"
   end
 
   private
@@ -84,7 +88,7 @@ class VisionCucumber < Tess::Plugin::Base
             "(You can, alternatively, ask me to terminate the current test by typing: <i>tess kill cucumber</i>)"] unless !@@run_cucumber
     @@ctype = 'html'
     @@run_cucumber = @speaker
-    ["#{aye} #{@speaker}!","<b>Running tests on @branch '#{@@branch}'</b>"]
+    ["#{aye} #{@speaker}!","<b>#{ VisionCucumber.describe_action }</b>"]
   end
 
   def response_text
@@ -94,7 +98,7 @@ class VisionCucumber < Tess::Plugin::Base
             "(You can alternatively ask me to terminate the current test by typing: tess kill cucumber)"] unless !@@run_cucumber
     @@ctype = 'text'
     @@run_cucumber = @speaker
-    ["#{aye} #{@speaker}!","Running tests on @branch '#{@@branch}'"]
+    ["#{aye} #{@speaker}!", VisionCucumber.describe_action ]
   end
   
   def dance

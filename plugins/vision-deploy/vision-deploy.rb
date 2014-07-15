@@ -22,7 +22,7 @@ class VisionDeploy < Tess::Plugin::Base
     end
   end
   
-  def describe_action
+  def self.describe_action
     case @@action
       when 'deploy' then "Deploying #{ @@branch }to #{ @@server }."
       when 'restart' then "Restarting #{@@server}"
@@ -35,9 +35,9 @@ class VisionDeploy < Tess::Plugin::Base
         if @@run_deploy
           result = ''
           Bundler.with_clean_env do
-            $tess_busy[1] = 1
+            $tess_busy << self.class
             result = `cd #{@@bot.config['deploy_dir']} && git checkout #{@@branch}; git pull && eval \`ssh-agent -s\` && ssh-add ~/.ssh/id_dsa && #{ cap_command } 2>&1`.chomp
-            $tess_busy[1] = 0
+            $tess_busy.delete self.class
 	    @@result = "deploy/#{Time.now().to_i}.html"
             File.open("tmp/#{@@result}", 'w') { |file| file.write("<pre>#{result}</pre>") }
           end
@@ -75,7 +75,7 @@ class VisionDeploy < Tess::Plugin::Base
         `pkill -KILL -f \`which cap\``
       end
       Thread.kill(@vc_thread)
-      $tess_busy[1] = 0
+      $tess_busy.delete self.class
       @@bot.speak("Deployment process killed as per #{message.speaker}'s request!", @@ctype)
       start_thread
       return false
@@ -98,7 +98,7 @@ class VisionDeploy < Tess::Plugin::Base
             "(You can, alternatively, ask me to terminate the current deployment by typing: <i>tess kill deploy</i>)"] unless !@@run_deploy
     @@ctype = 'html'
     @@run_deploy = @speaker
-    ["#{aye} #{@speaker}!","<b>#{ describe_action }</b>"]
+    ["#{aye} #{@speaker}!","<b>#{ VisionDeploy.describe_action }</b>"]
   end
 
   def response_text
@@ -106,7 +106,7 @@ class VisionDeploy < Tess::Plugin::Base
             "(You can alternatively ask me to terminate the current deployment by typing: tess kill deploy)"] unless !@@run_deploy
     @@ctype = 'text'
     @@run_deploy = @speaker
-    ["#{aye} #{@speaker}!","#{ describe_action }"]
+    ["#{aye} #{@speaker}!","#{ VisionDeploy.describe_action }"]
   end
   
   def aye
