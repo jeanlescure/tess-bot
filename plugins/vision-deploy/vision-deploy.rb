@@ -14,6 +14,13 @@ class VisionDeploy < Tess::Plugin::Base
     super(bot)
     @@result = "http://#{@@bot.config['host']}/deploy/"
   end
+
+  def cap_command
+    case @@command 
+      when "deploy" then "cap #{ @@server } -sbranch=\"#{ @@branch }\" deploy"
+      when "restart" then "cap #{ @@server } deploy:restart"
+    end
+  end
   
   def start_thread
     @vc_thread = Thread.new {
@@ -22,7 +29,7 @@ class VisionDeploy < Tess::Plugin::Base
           result = ''
           Bundler.with_clean_env do
             $tess_busy[1] = 1
-            result = `cd #{@@bot.config['deploy_dir']} && git checkout #{@@branch}; git pull && eval \`ssh-agent -s\` && ssh-add ~/.ssh/id_dsa && cap #{ @@server } -sbranch="#{ @@branch }" deploy 2>&1`.chomp
+            result = `cd #{@@bot.config['deploy_dir']} && git checkout #{@@branch}; git pull && eval \`ssh-agent -s\` && ssh-add ~/.ssh/id_dsa && #{ cap_command } 2>&1`.chomp
             $tess_busy[1] = 0
 	    @@result = "deploy/#{Time.now().to_i}.html"
             File.open("tmp/#{@@result}", 'w') { |file| file.write("<pre>#{result}</pre>") }
@@ -66,12 +73,13 @@ class VisionDeploy < Tess::Plugin::Base
       start_thread
       return false
     end
-    @@branch = $1 if ! @@run_deploy && message.content =~ /^tess.* (version|branch) ([a-zA-Z0-9\-_]+)$/
-    @@server = $1 if ! @@run_deploy && message.content =~ /^tess.* (?:to|into) (#{ available_servers.join "|" })$/
+    @@branch = $1 if ! @@run_deploy && message.content =~ /^tess.* (version|branch) ([a-zA-Z0-9\-_]+)/
+    @@server = $1 if ! @@run_deploy && message.content =~ /^tess.* (?:to|into|restart) (#{ available_servers.join "|" })/
+    @@command = $1 if ! @@run_deploy && message.context =~ /^tess.*(restart|deploy)/
 
     @@branch ||= 'master'
     @@server ||= 'staging'
-    message.content =~ /^tess\s+.*?((run\s+)|)deploy/i
+    message.content =~ /^tess\s+.*?((run\s+)|)(deploy|restart)/i
   end
 
   private
