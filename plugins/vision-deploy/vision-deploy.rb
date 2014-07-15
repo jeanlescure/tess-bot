@@ -98,7 +98,7 @@ class VisionDeploy < Tess::Plugin::Base
             "(You can, alternatively, ask me to terminate the current deployment by typing: <i>tess kill deploy</i>)"] unless !@@run_deploy
     @@ctype = 'html'
     @@run_deploy = @speaker
-    ["#{aye} #{@speaker}!","<b>Deploying #{@@branch} to #{@@server}.</b>"]
+    ["#{aye} #{@speaker}!","<b>#{ describe_action }</b>"]
   end
 
   def response_text
@@ -106,7 +106,7 @@ class VisionDeploy < Tess::Plugin::Base
             "(You can alternatively ask me to terminate the current deployment by typing: tess kill deploy)"] unless !@@run_deploy
     @@ctype = 'text'
     @@run_deploy = @speaker
-    ["#{aye} #{@speaker}!","Deploying #{@@branch} to #{@@server}."]
+    ["#{aye} #{@speaker}!","#{ describe_action }"]
   end
   
   def aye
