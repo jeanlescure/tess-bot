@@ -12,13 +12,13 @@ class TessResponder < Tess::Plugin::Base
       @@bot.speak(name_response(@speaker), @@ctype)
       return false
     end
-    if (message.content =~ /^tess\s+.*?(busy|(doing\s+something)|running)/i)
-      busy_message = $tess_busy.length == 0 ? "I am not doing anything right now." : "I am busy, yes."
+    if (message.content =~ /^tess.*are you (busy|doing|running)/i)
+      tasks = $tess_busy.map do |c|
+        c.describe_action if c.respond_to?("describe_action")
+      end.compact
+      busy_message = $tess_busy.length == 0 ? "I am not doing anything right now." : "I am busy, yes. I'm #{ Tess::Language.enumerate tasks }"
       @@bot.speak(busy_message, @@ctype)
 
-      $tess_busy.each do |c|
-        @@bot.speak( c.describe_action, @@ctype ) if c.respond_to?("describe_action")
-      end
       return false
     end
     if (message.content =~ /(tess\s+i|i|\S+)\s+loves{0,1}\s+you/i)

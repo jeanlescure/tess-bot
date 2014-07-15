@@ -6,6 +6,7 @@ require 'singleton'
 require 'tess/plugins'
 require 'tess/connections'
 require 'tess/message'
+require 'tess/language'
 require 'active_support/inflector'
 require 'webrick'
 

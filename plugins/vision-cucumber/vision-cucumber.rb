@@ -82,23 +82,23 @@ class VisionCucumber < Tess::Plugin::Base
   private
 
   def response_html
-    return ["<b>Sorry #{@speaker}, you must specify a branch for me to #{dance}.</b>",
+    return ["<b>Sorry #{@speaker}, you must specify a branch for me to #{Tess::Language.dance}.</b>",
             "<i>e.g.:</i> tess run cucumber on branch DEC-404"] unless @@branch
     return ["<b>#{@speaker}, your request to test cannot be processed until I finish the test initiated by #{@@run_cucumber}.</b>",
             "(You can, alternatively, ask me to terminate the current test by typing: <i>tess kill cucumber</i>)"] unless !@@run_cucumber
     @@ctype = 'html'
     @@run_cucumber = @speaker
-    ["#{aye} #{@speaker}!","<b>#{ VisionCucumber.describe_action }</b>"]
+    ["#{Tess::Language.aye} #{@speaker}!","<b>#{ VisionCucumber.describe_action }</b>"]
   end
 
   def response_text
-    return ["Sorry #{@speaker}, you must specify a branch for me to #{dance}.",
+    return ["Sorry #{@speaker}, you must specify a branch for me to #{Tess::Language.dance}.",
             "e.g.: tess run cucumber on branch DEC-404"] unless @@branch
     return ["#{@speaker}, your request to test cannot be processed until I finish the test initiated by #{@@run_cucumber == @speaker ? 'you' : @@run_cucumber}.",
             "(You can alternatively ask me to terminate the current test by typing: tess kill cucumber)"] unless !@@run_cucumber
     @@ctype = 'text'
     @@run_cucumber = @speaker
-    ["#{aye} #{@speaker}!", VisionCucumber.describe_action ]
+    ["#{Tess::Language.aye} #{@speaker}!", VisionCucumber.describe_action ]
   end
   
   def dance
