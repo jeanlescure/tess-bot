@@ -14,7 +14,7 @@ module Tess
     attr_accessor :config, :connection, :plugins, :hello_messages, :timezone
 
     def initialize
-      $tess_busy = [0,0]
+      $tess_busy = []
       load_config
       load_plugins
       create_connection
