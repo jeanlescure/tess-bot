@@ -22,7 +22,7 @@ class VisionDeploy < Tess::Plugin::Base
           result = ''
           Bundler.with_clean_env do
             $tess_busy[1] = 1
-            result = `cd #{@@bot.config['deploy_dir']} && git checkout #{@@branch} && git pull && eval \`ssh-agent -s\` && ssh-add ~/.ssh/id_dsa && cap #{ @@server || 'staging' } -sbranch="#{ @@branch || 'master' }" deploy 2>&1`.chomp
+            result = `cd #{@@bot.config['deploy_dir']} && git checkout #{@@branch} && git pull && eval \`ssh-agent -s\` && ssh-add ~/.ssh/id_dsa && cap #{ @@server } -sbranch="#{ @@branch }" deploy 2>&1`.chomp
             $tess_busy[1] = 0
 	    @@result = "deploy/#{Time.now().to_i}.html"
             File.open("tmp/#{@@result}", 'w') { |file| file.write("<pre>#{result}</pre>") }
@@ -47,6 +47,7 @@ class VisionDeploy < Tess::Plugin::Base
   end
   
   def respond_to_message?(message)
+    available_servers = [ 'dev', 'staging', 'production', 'testing' ]
     @speaker = message.speaker.titleize.split[0]
     if (message.content =~ /^tess\s+.*?(last|full)\s+deploy/i)
       last_result = "#{@speaker}, you can view the last deployment results at:\r\n"
@@ -66,7 +67,10 @@ class VisionDeploy < Tess::Plugin::Base
       return false
     end
     @@branch = $1 if ! @@run_deploy && message.content =~ /^tess.* (version|branch) ([a-zA-Z0-9\-_]+)$/
-    @@server = $1 if ! @@run_deploy && message.content =~ /^tess.* into ([a-zA-Z0-9\-_]+)$/
+    @@server = $1 if ! @@run_deploy && message.content =~ /^tess.* (?:to|into) (#{ available_servers.join "|" })$/
+
+    @@branch ||= 'master'
+    @@server ||= 'staging'
     message.content =~ /^tess\s+.*?((run\s+)|)deploy/i
   end
 
@@ -77,7 +81,7 @@ class VisionDeploy < Tess::Plugin::Base
             "(You can, alternatively, ask me to terminate the current deployment by typing: <i>tess kill deploy</i>)"] unless !@@run_deploy
     @@ctype = 'html'
     @@run_deploy = @speaker
-    ["#{aye} #{@speaker}!","<b>Deploying to staging.</b>"]
+    ["#{aye} #{@speaker}!","<b>Deploying to #{@@branch}.</b>"]
   end
 
   def response_text
@@ -85,7 +89,7 @@ class VisionDeploy < Tess::Plugin::Base
             "(You can alternatively ask me to terminate the current deployment by typing: tess kill deploy)"] unless !@@run_deploy
     @@ctype = 'text'
     @@run_deploy = @speaker
-    ["#{aye} #{@speaker}!","Deploying to staging."]
+    ["#{aye} #{@speaker}!","Deploying to #{@@branch}."]
   end
   
   def aye
